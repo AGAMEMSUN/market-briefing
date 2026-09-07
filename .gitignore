@@ -1,0 +1,17 @@
+__pycache__/
+*.pyc
+.pytest_cache/
+*.egg-info/
+build/
+dist/
+
+# 민감정보 + 제3자 저작물 — 로컬에만 둔다
+.env
+*.session
+*.session-journal
+scripts/.state/
+daily/
+
+# Claude Code 로컬 설정 (에이전트 정의만 추적)
+.claude/*
+!.claude/agents/

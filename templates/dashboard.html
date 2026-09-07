@@ -1,0 +1,273 @@
+<title>KECOBUGS 마켓 브리핑</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+KR:wght@300;400;500;600&family=Noto+Serif+KR:wght@500;700&display=swap">
+<style>
+  :root{
+    --paper:#F4F6F8;
+    --card:#FFFFFF;
+    --ink:#141A22;
+    --ink-2:#3D4756;
+    --muted:#6B7686;
+    --rule:#DDE3EA;
+    --rule-soft:#E9EDF2;
+    --accent:#1E4A7A;
+    --accent-soft:#E8EFF6;
+    --up:#C0392B;
+    --down:#1B5FA8;
+    --warn:#9A6410;
+    --warn-bg:#FBF3E3;
+    --shadow:0 1px 2px rgba(20,26,34,.05),0 8px 24px -14px rgba(20,26,34,.18);
+  }
+  @media (prefers-color-scheme:dark){
+    :root:not([data-theme="light"]){
+      --paper:#101419;
+      --card:#171D25;
+      --ink:#E8ECF1;
+      --ink-2:#B4BECB;
+      --muted:#828E9E;
+      --rule:#2A323C;
+      --rule-soft:#222933;
+      --accent:#7FB0E0;
+      --accent-soft:#1B2733;
+      --up:#E8705F;
+      --down:#6FA8E0;
+      --warn:#D9A24A;
+      --warn-bg:#2A2318;
+      --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px -14px rgba(0,0,0,.7);
+    }
+  }
+  :root[data-theme="dark"]{
+    --paper:#101419;
+    --card:#171D25;
+    --ink:#E8ECF1;
+    --ink-2:#B4BECB;
+    --muted:#828E9E;
+    --rule:#2A323C;
+    --rule-soft:#222933;
+    --accent:#7FB0E0;
+    --accent-soft:#1B2733;
+    --up:#E8705F;
+    --down:#6FA8E0;
+    --warn:#D9A24A;
+    --warn-bg:#2A2318;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px -14px rgba(0,0,0,.7);
+  }
+
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:"IBM Plex Sans KR",system-ui,-apple-system,"Malgun Gothic",sans-serif;
+    font-weight:400;
+    line-height:1.7;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:1040px;margin:0 auto;padding:44px 24px 80px}
+
+  /* ---- masthead ---- */
+  .mast{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:16px;
+        padding-bottom:18px;border-bottom:2px solid var(--ink)}
+  .mast h1{font-family:"Noto Serif KR",Georgia,serif;font-weight:700;font-size:30px;line-height:1.25;
+           margin:0;letter-spacing:-.01em;text-wrap:balance}
+  .mast .sub{color:var(--muted);font-size:13px;margin-top:6px}
+  .stamp{font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--muted);text-align:right;
+         font-variant-numeric:tabular-nums;line-height:1.6}
+  .stamp b{display:block;color:var(--ink-2);font-size:15px;font-weight:500}
+
+  /* ---- indicator strip ---- */
+  .strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(178px,1fr));gap:1px;
+         background:var(--rule);border:1px solid var(--rule);margin:0 0 8px;
+         border-radius:3px;overflow:hidden}
+  .tile{background:var(--card);padding:13px 14px 11px;display:flex;flex-direction:column;gap:7px}
+  .tile .nm{font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);font-weight:500}
+  .tile .row{display:flex;align-items:baseline;justify-content:space-between;gap:8px}
+  .tile .val{font-family:"IBM Plex Mono",monospace;font-size:19px;font-weight:500;color:var(--ink);
+             font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+  .tile .chg{font-family:"IBM Plex Mono",monospace;font-size:12px;font-variant-numeric:tabular-nums;font-weight:500}
+  .up{color:var(--up)} .down{color:var(--down)}
+  .tile svg{display:block;width:100%;height:26px}
+  .tile .nospark{font-size:11px;color:var(--warn);background:var(--warn-bg);
+                 padding:4px 7px;border-radius:2px;line-height:1.45}
+  .asof{font-family:"IBM Plex Mono",monospace;font-size:10px;color:var(--muted);letter-spacing:.02em}
+  .strip-note{font-size:12px;color:var(--muted);margin:0 0 34px;line-height:1.6}
+
+  /* ---- sections ---- */
+  .topic{border-top:1px solid var(--rule);padding:28px 0 4px}
+  .topic:first-of-type{border-top:2px solid var(--ink-2)}
+  .thead{display:flex;flex-wrap:wrap;align-items:baseline;gap:10px;margin-bottom:4px}
+  .chan{font-size:12px;font-weight:600;color:var(--accent);letter-spacing:.01em;
+        background:var(--accent-soft);padding:2px 8px;border-radius:2px}
+  .topic h2{font-family:"Noto Serif KR",Georgia,serif;font-weight:500;font-size:21px;margin:6px 0 0;
+            line-height:1.4;letter-spacing:-.01em;text-wrap:balance;flex-basis:100%}
+  .merged{font-size:12.5px;color:var(--muted);margin:9px 0 0;padding-left:11px;
+          border-left:2px solid var(--rule)}
+  .merged b{color:var(--ink-2);font-weight:500}
+
+  .body{margin-top:16px;display:grid;gap:14px}
+  .lbl{font-size:10.5px;letter-spacing:.11em;text-transform:uppercase;color:var(--muted);
+       font-weight:600;margin-bottom:5px}
+  .body p{margin:0;font-size:14.5px;color:var(--ink-2);max-width:70ch}
+  .summary{font-size:15.5px;color:var(--ink);font-weight:500;line-height:1.65;max-width:66ch}
+
+  .metrics{display:flex;flex-wrap:wrap;gap:7px}
+  .chip{font-family:"IBM Plex Mono",monospace;font-size:12px;font-variant-numeric:tabular-nums;
+        border:1px solid var(--rule);background:var(--card);padding:4px 9px;border-radius:2px;
+        color:var(--ink-2)}
+  .chip b{font-weight:500;color:var(--ink)}
+
+  .draft{background:var(--card);border:1px solid var(--rule);border-left:3px solid var(--accent);
+         border-radius:2px;padding:14px 16px;box-shadow:var(--shadow)}
+  .draft .lbl{color:var(--accent)}
+  .draft p{font-size:14.5px;color:var(--ink-2);max-width:68ch}
+
+  /* ---- roster ---- */
+  .roster{margin-top:44px;border-top:2px solid var(--ink-2);padding-top:18px;
+          display:grid;gap:11px}
+  .rrow{display:flex;flex-wrap:wrap;gap:8px;align-items:baseline;font-size:12.5px}
+  .rrow .k{font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);
+           font-weight:600;min-width:104px}
+  .rrow .v{color:var(--ink-2);flex:1;min-width:240px}
+  .foot{margin-top:26px;font-size:12px;color:var(--muted);line-height:1.7}
+  .foot code{font-family:"IBM Plex Mono",monospace;font-size:11.5px;
+             background:var(--rule-soft);padding:1px 5px;border-radius:2px}
+  a{color:var(--accent)}
+  @media (max-width:560px){
+    .wrap{padding:30px 16px 60px}
+    .mast h1{font-size:24px}
+    .stamp{text-align:left}
+  }
+</style>
+
+
+<div class="wrap">
+
+  <header class="mast">
+    <div>
+      <h1>마켓 브리핑</h1>
+      <div class="sub" id="sub"></div>
+    </div>
+    <div class="stamp" id="stamp"></div>
+  </header>
+
+  <section class="strip" id="strip" aria-label="시장 지표"></section>
+  <p class="strip-note" id="strip-note"></p>
+
+  <section id="topics"></section>
+
+  <section class="roster" id="roster"></section>
+
+  <p class="foot">
+    인사이트는 <strong>초안</strong>입니다 — 사실관계 정리와 논점 제시까지가 이 문서의 역할이고,
+    최종 견해는 직접 다듬어 쓰셔야 합니다.<br>
+    갱신: <code>/brief</code> · 수집만: <code>/brief-collect</code> ·
+    토픽만: <code>/brief-topics</code> · 심층: <code>/brief-dig &lt;토픽&gt;</code>
+  </p>
+</div>
+
+<script>
+const PAYLOAD = __PAYLOAD__;
+
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c =>
+  ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+const isDown = v => /^[-−]/.test(String(v));
+
+function fmtValue(ind){
+  if (typeof ind.last !== "number") return "—";
+  if (ind.unit === "percent") return ind.last.toFixed(2) + "%";
+  if (Math.abs(ind.last) < 100) return ind.last.toFixed(2);
+  return ind.last.toLocaleString("ko-KR", {minimumFractionDigits:2, maximumFractionDigits:2});
+}
+
+function spark(points, rising){
+  const W = 160, H = 26, P = 3;
+  const min = Math.min(...points), max = Math.max(...points);
+  const span = (max - min) || 1;
+  const x = i => P + (i * (W - P*2)) / (points.length - 1);
+  const y = v => H - P - ((v - min) / span) * (H - P*2);
+  const d = points.map((v,i) => (i ? "L" : "M") + x(i).toFixed(1) + " " + y(v).toFixed(1)).join(" ");
+  const area = d + " L" + x(points.length-1).toFixed(1) + " " + (H-P) + " L" + x(0).toFixed(1) + " " + (H-P) + " Z";
+  const stroke = rising ? "var(--up)" : "var(--down)";
+  const lx = x(points.length-1).toFixed(1), ly = y(points[points.length-1]).toFixed(1);
+  return '<svg viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="none" role="img" aria-hidden="true">'
+       + '<path d="'+area+'" fill="'+stroke+'" fill-opacity="0.09" stroke="none"></path>'
+       + '<path d="'+d+'" fill="none" stroke="'+stroke+'" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"></path>'
+       + '<circle cx="'+lx+'" cy="'+ly+'" r="2.1" fill="'+stroke+'"></circle></svg>';
+}
+
+function renderMasthead(p){
+  document.getElementById("sub").textContent =
+    "KECOBUGS 26th · 텔레그램 " + p.channel_count + "개 채널 " + p.message_count
+    + "건에서 " + (p.topics || []).length + "개 이슈로 정리";
+  document.getElementById("stamp").innerHTML =
+    "<b>" + esc(p.date) + "</b>" + esc(p.collected_at || "");
+}
+
+function renderStrip(p){
+  document.getElementById("strip").innerHTML = (p.indicators || []).map(ind => {
+    const rising = (ind.change_pct ?? 0) >= 0;
+    const chart = Array.isArray(ind.spark) && ind.spark.length > 1
+      ? spark(ind.spark, rising)
+      : '<div class="nospark">' + esc(ind.note || "추이 데이터 없음") + '</div>';
+    const chg = typeof ind.change_pct === "number"
+      ? '<span class="chg ' + (rising ? "up" : "down") + '">'
+        + (rising ? "+" : "−") + Math.abs(ind.change_pct).toFixed(2) + '%</span>'
+      : "";
+    return '<div class="tile"><div class="nm">' + esc(ind.label || ind.name) + '</div>'
+         + '<div class="row"><span class="val">' + fmtValue(ind) + '</span>' + chg + '</div>'
+         + chart + '<div class="asof">' + esc(ind.as_of || "") + '</div></div>';
+  }).join("");
+
+  const notes = (p.indicators || []).filter(i => i.note).map(i => esc(i.label || i.name));
+  const base = "지수·환율은 조회한 종가 기준이며 등락률은 직전 거래일 대비입니다.";
+  document.getElementById("strip-note").textContent = notes.length
+    ? base + " 원본 시계열에 비정상 변동이 확인되어 추이 차트를 제외한 지표: " + notes.join(", ")
+    : base;
+}
+
+function renderTopics(p){
+  document.getElementById("topics").innerHTML = (p.topics || []).map(t => {
+    const merged = (t.merged || []).length
+      ? '<p class="merged">↳ ' + t.merged.map(m =>
+          "<b>" + esc(m.channel) + "</b>의 " + esc(m.what)).join(", ") + "이 이 섹션에 병합됨</p>"
+      : "";
+    const chips = (t.indicators || []).map(i =>
+      '<span class="chip">' + esc(i.label) + ' <b>' + esc(i.value) + '</b>'
+      + (i.change ? ' <span class="' + (isDown(i.change) ? "down" : "up") + '">'
+                    + esc(i.change) + '</span>' : "")
+      + '</span>').join("");
+    return '<article class="topic">'
+      + '<div class="thead"><span class="chan">' + esc(t.primary_channel) + '</span>'
+      + '<h2>' + esc(t.title) + '</h2></div>'
+      + merged
+      + '<div class="body">'
+      + '<div><div class="lbl">정리</div><p>' + esc(t.organized) + '</p></div>'
+      + '<div><div class="lbl">요약</div><p class="summary">' + esc(t.summary) + '</p></div>'
+      + (chips ? '<div><div class="lbl">지표</div><div class="metrics">' + chips + '</div></div>' : "")
+      + '<div class="draft"><div class="lbl">인사이트 초안 — 검토 필요</div>'
+      + '<p>' + esc(t.draft_insight) + '</p></div>'
+      + '</div></article>';
+  }).join("");
+}
+
+function renderRoster(p){
+  const rows = [];
+  const add = (k, v) => { if (v && v.length) rows.push(
+    '<div class="rrow"><span class="k">' + k + '</span><span class="v">'
+    + esc(v.join(" · ")) + '</span></div>'); };
+  add("오늘 새 글 없음", p.quiet_channels);
+  add("조회 못 함", p.not_checked_channels);
+  add("제외 채널", p.excluded_channels);
+  if (p.excluded_note) rows.push(
+    '<div class="rrow"><span class="k">필터</span><span class="v">'
+    + esc(p.excluded_note) + '</span></div>');
+  document.getElementById("roster").innerHTML = rows.join("");
+}
+
+renderMasthead(PAYLOAD);
+renderStrip(PAYLOAD);
+renderTopics(PAYLOAD);
+renderRoster(PAYLOAD);
+</script>

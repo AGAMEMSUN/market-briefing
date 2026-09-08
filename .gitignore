@@ -12,6 +12,10 @@ dist/
 scripts/.state/
 daily/
 
+# 사용자마다 다른 Artifact 주소. 첫 발행 때 생성된다 — 남의 주소를 클론받으면
+# 갱신 시 권한 오류가 난다.
+DASHBOARD_URL.txt
+
 # Claude Code 로컬 설정 (에이전트 정의만 추적)
 .claude/*
 !.claude/agents/

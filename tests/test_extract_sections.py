@@ -60,6 +60,26 @@ def test_slice_output_reparses_to_the_same_messages():
         ("A", "08:00", "첫 번째 메시지"), ("B", "10:00", "세 번째 메시지")]
 
 
+def test_purge_stale_removes_files_not_in_todays_topics(tmp_path):
+    """지난 실행의 슬라이스가 남으면 검수 에이전트가 없는 누락을 보고한다."""
+    (tmp_path / "t1.md").write_text("오늘", encoding="utf-8")
+    (tmp_path / "t7.md").write_text("어제 잔여물", encoding="utf-8")
+    removed = extract_sections.purge_stale([tmp_path], {"t1"}, ".md")
+    assert [r.split("/")[-1] for r in removed] == ["t7.md"]
+    assert (tmp_path / "t1.md").exists()
+    assert not (tmp_path / "t7.md").exists()
+
+
+def test_purge_stale_ignores_other_suffixes(tmp_path):
+    (tmp_path / "notes.txt").write_text("건드리지 말 것", encoding="utf-8")
+    assert extract_sections.purge_stale([tmp_path], {"t1"}, ".md") == []
+    assert (tmp_path / "notes.txt").exists()
+
+
+def test_purge_stale_tolerates_missing_directory(tmp_path):
+    assert extract_sections.purge_stale([tmp_path / "없음"], {"t1"}, ".md") == []
+
+
 def test_slice_escapes_heading_line_in_body():
     digest = ("# 텔레그램 다이제스트 — 2026-09-06 정오 기준\n\n"
               "## A\n- (08:00) 헤드라인\n ## 소제목\n본문 계속\n")

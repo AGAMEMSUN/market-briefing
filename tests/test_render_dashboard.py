@@ -62,3 +62,31 @@ def test_rendered_script_block_is_not_terminated_early():
     rendered = render_dashboard.render(template, payload)
     # 템플릿 자체의 </script> 는 딱 하나여야 한다 — payload 가 하나를 더 만들면 안 된다.
     assert rendered.count("</script>") == 1
+
+
+def test_title_falls_back_to_neutral_without_a_brand():
+    """브랜드를 안 넣은 사용자에게 남의 소속이 따라가면 안 된다."""
+    assert render_dashboard.title_for("") == "마켓 브리핑"
+    assert render_dashboard.title_for("   ") == "마켓 브리핑"
+
+
+def test_title_prefixes_the_brand():
+    assert render_dashboard.title_for("KECOBUGS 26th") == "KECOBUGS 26th 마켓 브리핑"
+
+
+def test_title_escapes_html():
+    """<title> 안에 그대로 들어가므로 태그를 닫아버리면 안 된다."""
+    assert render_dashboard.title_for("</title><script>") == \
+        "&lt;/title&gt;&lt;script&gt; 마켓 브리핑"
+    assert render_dashboard.title_for("A&B") == "A&amp;B 마켓 브리핑"
+
+
+def test_render_substitutes_the_title_placeholder():
+    out = render_dashboard.render("<title>__TITLE__</title>__PAYLOAD__", "{}", "내 브랜드")
+    assert "<title>내 브랜드 마켓 브리핑</title>" in out
+    assert "__TITLE__" not in out
+
+
+def test_render_still_works_without_a_brand():
+    out = render_dashboard.render("<title>__TITLE__</title>__PAYLOAD__", "{}")
+    assert "<title>마켓 브리핑</title>" in out

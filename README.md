@@ -44,12 +44,14 @@ cp .env.example .env   # Windows: copy .env.example .env
 
 `.env` 를 열어 값을 채운다. 필요한 키와 발급 방법은 파일 안에 적혀 있다.
 
-| 키 | 필수 | 발급처 |
+| 키 | 필수 | 발급처 / 용도 |
 |---|---|---|
 | `TELEGRAM_API_ID` / `TELEGRAM_API_HASH` | **필수** | https://my.telegram.org → API development tools |
 | `TOSS_CLIENT_ID` / `TOSS_CLIENT_SECRET` | 선택 | 토스증권 앱 → 설정 → Open API |
+| `BRIEFING_BRAND` | 선택 | 대시보드 제목·머리말에 붙일 본인/소속 표기. 비우면 그냥 "마켓 브리핑" |
 
-`.env` 는 `.gitignore` 에 등록돼 있어 커밋되지 않는다.
+`.env` 는 `.gitignore` 에 등록돼 있어 커밋되지 않는다. 사용자별 설정이 전부 여기
+모여 있어서, 이 저장소를 클론해도 남의 계정·소속·대시보드 주소가 따라오지 않는다.
 
 ### 3. 텔레그램 로그인 (최초 1회)
 

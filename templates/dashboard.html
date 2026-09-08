@@ -1,4 +1,4 @@
-<title>KECOBUGS 마켓 브리핑</title>
+<title>__TITLE__</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+KR:wght@300;400;500;600&family=Noto+Serif+KR:wght@500;700&display=swap">
@@ -198,8 +198,11 @@ function spark(points, rising){
 }
 
 function renderMasthead(p){
+  // brand 는 사용자별 값이라 payload 로 받는다. 없으면 그냥 생략한다.
+  // textContent 로 넣으므로 esc() 를 씌우면 &amp; 가 그대로 보인다.
+  const brand = p.brand ? p.brand + " · " : "";
   document.getElementById("sub").textContent =
-    "KECOBUGS 26th · 텔레그램 " + p.channel_count + "개 채널 " + p.message_count
+    brand + "텔레그램 " + p.channel_count + "개 채널 " + p.message_count
     + "건에서 " + (p.topics || []).length + "개 이슈로 정리";
   document.getElementById("stamp").innerHTML =
     "<b>" + esc(p.date) + "</b>" + esc(p.collected_at || "");

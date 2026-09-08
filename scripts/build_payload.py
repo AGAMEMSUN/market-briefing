@@ -93,8 +93,20 @@ def topic_payload(section: dict) -> dict:
     }
 
 
+def brand() -> str:
+    """대시보드 머리말에 붙일 사용자별 표기(예: 소속 스터디 이름).
+
+    `.env` 에서 읽는다 — 사람마다 다른 값이고 `.env` 는 커밋되지 않으므로,
+    저장소를 클론한 다른 사용자에게 남의 소속이 따라가지 않는다. 비워두면
+    브랜드 없이 '마켓 브리핑'으로만 나온다.
+    """
+    import toss_client  # .env 파서를 재사용한다
+
+    return toss_client.load_env().get("BRIEFING_BRAND", "").strip()
+
+
 def build(topics: list[dict], sections: list[dict], snapshot: dict, index: dict,
-          collected_at: str = "") -> dict:
+          collected_at: str = "", brand_name: str = "") -> dict:
     noise = index.get("noise_counts") or {}
     parts = [f"{label} {noise[key]}건" for key, label in
              (("advertorial", "협찬성 기사"), ("low_signal", "저신호 단문"),
@@ -103,6 +115,7 @@ def build(topics: list[dict], sections: list[dict], snapshot: dict, index: dict,
     return {
         "date": index.get("date") or datetime.now().strftime("%Y-%m-%d"),
         "collected_at": collected_at,
+        "brand": brand_name,
         "channel_count": len(index.get("channels") or {}),
         "message_count": total,
         "filtered_out": noise,
@@ -132,7 +145,8 @@ def main() -> None:
         topics, sections,
         json.loads(_SNAPSHOT_PATH.read_text(encoding="utf-8")),
         json.loads(_INDEX_PATH.read_text(encoding="utf-8")),
-        collected_at=datetime.now().strftime("%H:%M KST 발행"))
+        collected_at=datetime.now().strftime("%H:%M KST 발행"),
+        brand_name=brand())
     _OUT_PATH.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
 
     dropped = [i["label"] for i in payload["indicators"] if i["spark"] is None]

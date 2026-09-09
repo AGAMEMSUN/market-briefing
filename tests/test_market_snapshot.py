@@ -24,7 +24,7 @@ def test_build_snapshot_covers_all_indicators():
     snap = market_snapshot.build_snapshot(fetch=_fake_fetch, toss_fetch=_toss_fetch)
     names = [i["name"] for i in snap["indicators"]]
     assert names == ["KOSPI", "KOSDAQ", "KR 10Y", "S&P 500", "NASDAQ",
-                     "USD/KRW", "US 10Y", "VIX"]
+                     "US 10Y", "VIX", "USD/KRW", "DXY", "WTI", "Gold"]
 
 
 def test_toss_only_indicator_is_skipped_without_credentials():
@@ -147,3 +147,42 @@ def test_is_not_fresh_with_naive_timestamp():
     파싱 실패와 같이 취급해야 한다.
     """
     assert market_snapshot.is_fresh({"fetched_at": "2026-09-06T12:00:00"}, _now()) is False
+
+
+def _sector_fetch(tickers):
+    """XLE 만 크게 오르고 XLK 는 내린 하루."""
+    moves = {"XLE": (100.0, 104.0), "XLK": (200.0, 196.0)}
+    return {t: ("2026-09-08", moves[t][1], moves[t][0]) for t in tickers if t in moves}
+
+
+def test_sectors_are_sorted_by_change_desc():
+    """히트맵은 순위 자체가 정보다 — 강한 축이 앞에 와야 한다."""
+    sectors = market_snapshot.build_sectors(_sector_fetch)
+    assert [s["label"] for s in sectors] == ["에너지", "기술"]
+    assert sectors[0]["change_pct"] == 4.0
+    assert sectors[1]["change_pct"] == -2.0
+
+
+def test_sectors_carry_no_history():
+    """섹터는 스파크라인을 안 그린다 — 시계열을 담으면 스냅샷만 두 배가 된다."""
+    assert all("history" not in s for s in market_snapshot.build_sectors(_sector_fetch))
+
+
+def test_sectors_are_empty_without_a_fetcher():
+    assert market_snapshot.build_sectors(None) == []
+
+
+def test_sector_failure_does_not_break_the_snapshot():
+    """섹터 조회가 죽어도 지표 타일은 그대로 나가야 한다."""
+    def boom(_tickers):
+        raise RuntimeError("네트워크 실패")
+
+    snap = market_snapshot.build_snapshot(fetch=_fake_fetch, sector_fetch=boom)
+    assert snap["sectors"] == []
+    assert any(i["name"] == "KOSPI" for i in snap["indicators"])
+
+
+def test_brief_keeps_sectors_for_the_agents():
+    """섹션 작성 에이전트가 '어느 섹터가 강했나'를 근거로 쓸 수 있어야 한다."""
+    snap = market_snapshot.build_snapshot(fetch=_fake_fetch, sector_fetch=_sector_fetch)
+    assert [s["label"] for s in market_snapshot.brief_of(snap)["sectors"]] == ["에너지", "기술"]

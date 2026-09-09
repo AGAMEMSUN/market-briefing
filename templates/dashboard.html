@@ -77,7 +77,9 @@
   .stamp b{display:block;color:var(--ink-2);font-size:15px;font-weight:500}
 
   /* ---- indicator strip ---- */
-  .strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(178px,1fr));gap:1px;
+  /* 지표가 11종이라 열 수가 중요하다 — 5열이면 5+5+1 로 깔려 마지막 줄에 빈 칸이
+     4개 남는다. 4열이면 4+4+3 이라 빈 칸이 하나뿐이고 타일도 넓어진다. */
+  .strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1px;
          background:var(--rule);border:1px solid var(--rule);margin:0 0 8px;
          border-radius:3px;overflow:hidden}
   .tile{background:var(--card);padding:13px 14px 11px;display:flex;flex-direction:column;gap:7px}
@@ -93,8 +95,39 @@
   .asof{font-family:"IBM Plex Mono",monospace;font-size:10px;color:var(--muted);letter-spacing:.02em}
   .strip-note{font-size:12px;color:var(--muted);margin:0 0 34px;line-height:1.6}
 
+  /* ---- sector heatmap ---- */
+  .sec-cap{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;
+           gap:8px;margin:14px 0 6px}
+  .sec-cap .k{font-size:10.5px;letter-spacing:.11em;text-transform:uppercase;
+              color:var(--muted);font-weight:600}
+  .sec-cap .d{font-family:"IBM Plex Mono",monospace;font-size:10.5px;color:var(--muted)}
+  .sectors{display:grid;grid-template-columns:repeat(auto-fit,minmax(88px,1fr));gap:1px;
+           background:var(--rule);border:1px solid var(--rule);margin:0 0 8px;
+           border-radius:3px;overflow:hidden}
+  .sec{padding:10px 6px 9px;display:flex;flex-direction:column;align-items:center;gap:3px;
+       text-align:center;background:var(--card)}
+  .sec .snm{font-size:11.5px;color:var(--ink-2);font-weight:500;white-space:nowrap}
+  .sec .spc{font-family:"IBM Plex Mono",monospace;font-size:13px;font-weight:500;
+            font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+
+  /* ---- overview ---- */
+  html{scroll-behavior:smooth}
+  .toc{border-top:2px solid var(--ink-2);padding-top:16px;margin:0 0 4px}
+  .toc .cap{font-size:10.5px;letter-spacing:.11em;text-transform:uppercase;color:var(--muted);
+            font-weight:600;margin-bottom:13px}
+  .toc ol{list-style:none;margin:0;padding:0;display:grid;gap:14px}
+  .toc li{display:flex;gap:11px}
+  .toc .no{font-family:"IBM Plex Mono",monospace;font-size:12.5px;color:var(--muted);
+           font-variant-numeric:tabular-nums;flex:0 0 18px;padding-top:2px}
+  .toc .it{flex:1;min-width:0;display:grid;gap:3px}
+  .toc .tt{font-size:15px;font-weight:500;color:var(--ink);line-height:1.45;
+           text-decoration:none;text-wrap:balance}
+  .toc .tt:hover{color:var(--accent);text-decoration:underline}
+  .toc .ch{font-size:12px;color:var(--muted);line-height:1.6}
+  .toc .ix{font-family:"IBM Plex Mono",monospace;font-size:11.5px;color:var(--ink-2)}
+
   /* ---- sections ---- */
-  .topic{border-top:1px solid var(--rule);padding:28px 0 4px}
+  .topic{border-top:1px solid var(--rule);padding:28px 0 4px;scroll-margin-top:14px}
   .topic:first-of-type{border-top:2px solid var(--ink-2)}
   .thead{display:flex;flex-wrap:wrap;align-items:baseline;gap:10px;margin-bottom:4px}
   .chan{font-size:12px;font-weight:600;color:var(--accent);letter-spacing:.01em;
@@ -109,6 +142,8 @@
   .lbl{font-size:10.5px;letter-spacing:.11em;text-transform:uppercase;color:var(--muted);
        font-weight:600;margin-bottom:5px}
   .body p{margin:0;font-size:14.5px;color:var(--ink-2);max-width:70ch}
+  /* 정리 본문은 문단으로 끊긴다 — 1,000자 넘는 한 덩어리는 읽히지 않는다 */
+  .body p + p{margin-top:.75em}
   .summary{font-size:15.5px;color:var(--ink);font-weight:500;line-height:1.65;max-width:66ch}
 
   .metrics{display:flex;flex-wrap:wrap;gap:7px}
@@ -152,15 +187,23 @@
   </header>
 
   <section class="strip" id="strip" aria-label="시장 지표"></section>
+
+  <div class="sec-cap" id="sec-cap" hidden>
+    <span class="k">미국 섹터 · 전일 대비</span><span class="d" id="sec-asof"></span>
+  </div>
+  <section class="sectors" id="sectors" aria-label="섹터 등락"></section>
+
   <p class="strip-note" id="strip-note"></p>
+
+  <section class="toc" id="toc" aria-label="오늘의 이슈 개요"></section>
 
   <section id="topics"></section>
 
   <section class="roster" id="roster"></section>
 
   <p class="foot">
-    인사이트는 <strong>초안</strong>입니다 — 사실관계 정리와 논점 제시까지가 이 문서의 역할이고,
-    최종 견해는 직접 다듬어 쓰셔야 합니다.<br>
+    인사이트는 본문과 요약에서 <strong>무엇을 읽어내야 하는지</strong>를 정리한 것입니다 —
+    최종 판단과 매매 결정은 직접 내리셔야 합니다.<br>
     갱신: <code>/brief</code> · 수집만: <code>/brief-collect</code> ·
     토픽만: <code>/brief-topics</code> · 심층: <code>/brief-dig &lt;토픽&gt;</code>
   </p>
@@ -198,12 +241,12 @@ function spark(points, rising){
 }
 
 function renderMasthead(p){
-  // brand 는 사용자별 값이라 payload 로 받는다. 없으면 그냥 생략한다.
+  // 소속 표기는 뺐다. 이 문서의 목적은 제출물이 아니라 "텔레그램에 쌓인 정보를
+  // 정리해 시황·거시를 파악하는 것"이라, 머리말은 수집 사실만 말한다.
   // textContent 로 넣으므로 esc() 를 씌우면 &amp; 가 그대로 보인다.
-  const brand = p.brand ? p.brand + " · " : "";
   document.getElementById("sub").textContent =
-    brand + "텔레그램 " + p.channel_count + "개 채널 " + p.message_count
-    + "건에서 " + (p.topics || []).length + "개 이슈로 정리";
+    "텔레그램 " + p.channel_count + "개 채널 " + p.message_count + "건 → "
+    + (p.topics || []).length + "개 이슈 · 시황·거시 지표 동시 확인";
   document.getElementById("stamp").innerHTML =
     "<b>" + esc(p.date) + "</b>" + esc(p.collected_at || "");
 }
@@ -230,6 +273,87 @@ function renderStrip(p){
     : base;
 }
 
+// 개요에서만 채널명을 줄인다 — 본문 헤더와 병합 표기에는 원래 이름이 그대로 나가야
+// 출처가 흐려지지 않는다. 이모지·괄호 영문명·" - 담당자" 꼬리를 떼고 14자로 자른다.
+const _DECOR = /[\u{1F1E6}-\u{1F1FF}\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{FE0F}]/gu;
+
+function shortChannel(name){
+  const s = String(name || "")
+    .replace(_DECOR, "")
+    .replace(/\([^)]*\)/g, "")
+    .replace(/[\[\]]/g, "")
+    .replace(/\s+[-\u2013\u2014]\s+.*$/, "")
+    .replace(/\s+/g, " ")
+    .trim();
+  // 자른 끝에 공백이 남으면 "전략 …" 처럼 말줄임이 떠 보인다.
+  return s.length > 14 ? s.slice(0, 13).replace(/\s+$/, "") + "\u2026" : s;
+}
+
+function renderToc(p){
+  const topics = p.topics || [];
+  const node = document.getElementById("toc");
+  if (!topics.length){ node.hidden = true; return; }
+  node.innerHTML = '<div class="cap">오늘의 이슈 ' + topics.length + '건</div><ol>'
+    + topics.map((t, i) => {
+      const names = [t.primary_channel]
+        .concat((t.merged || []).map(m => m.channel))
+        .filter(Boolean)
+        .map(c => '<span title="' + esc(c) + '">' + esc(shortChannel(c)) + '</span>')
+        .join(" · ");
+      const inds = (t.indicators || []).map(x => esc(x.label)).filter(Boolean).join(" · ");
+      return '<li><span class="no">' + (i + 1) + '</span><div class="it">'
+        + '<a class="tt" href="#topic-' + esc(t.topic_id) + '">' + esc(t.title) + '</a>'
+        + (names ? '<div class="ch">' + names + '</div>' : "")
+        + (inds ? '<div class="ix">' + inds + '</div>' : "")
+        + '</div></li>';
+    }).join("") + '</ol>';
+}
+
+function renderSectors(p){
+  const list = p.sectors || [];
+  const cap = document.getElementById("sec-cap");
+  if (!list.length){ cap.hidden = true; return; }
+  cap.hidden = false;
+  document.getElementById("sec-asof").textContent = list[0].as_of || "";
+
+  // 색 농도는 등락 폭에 비례한다 — ±2% 를 최대치로 잡는다. 그 이상 움직인 날은
+  // 어차피 전 섹터가 물들어서 대비가 사라진다.
+  document.getElementById("sectors").innerHTML = list.map(s => {
+    const v = s.change_pct;
+    const rising = v >= 0;
+    const w = (6 + Math.min(Math.abs(v) / 2, 1) * 22).toFixed(0);
+    const tint = rising ? "var(--up)" : "var(--down)";
+    return '<div class="sec" style="background:color-mix(in srgb, ' + tint + ' ' + w + '%, var(--card))">'
+         + '<span class="snm">' + esc(s.label || s.ticker) + '</span>'
+         + '<span class="spc ' + (rising ? "up" : "down") + '">'
+         + (rising ? "+" : "−") + Math.abs(v).toFixed(2) + '</span></div>';
+  }).join("");
+}
+
+// 정리 본문을 문단으로 끊는다. 작성 에이전트가 빈 줄로 구분해 쓰지만, 구버전
+// 섹션 JSON 은 한 덩어리라 문장 단위 폴백이 필요하다.
+function paragraphs(text){
+  const t = String(text || "").trim();
+  if (!t) return "";
+  let parts = t.split(/\n{2,}/).map(x => x.trim()).filter(Boolean);
+  if (parts.length === 1) parts = t.split(/\n/).map(x => x.trim()).filter(Boolean);
+  if (parts.length === 1 && parts[0].length > 400) parts = chunkSentences(parts[0]);
+  return parts.map(x => '<p>' + esc(x) + '</p>').join("");
+}
+
+function chunkSentences(t, per = 3){
+  // 마침표 뒤에 숫자가 오면 문장 끝이 아니라 소수점이다 — (?!\d) 가 없으면
+  // "WTI 92.65달러" 가 "…92." / "65달러…" 로 갈려 숫자가 두 문단에 나뉜다.
+  const re = /[\s\S]*?[.!?。](?!\d)\s*/g;
+  const sents = [];
+  let last = 0, m;
+  while ((m = re.exec(t)) !== null){ sents.push(m[0]); last = re.lastIndex; }
+  if (last < t.length) sents.push(t.slice(last));
+  const out = [];
+  for (let i = 0; i < sents.length; i += per) out.push(sents.slice(i, i + per).join("").trim());
+  return out.filter(Boolean);
+}
+
 function renderTopics(p){
   document.getElementById("topics").innerHTML = (p.topics || []).map(t => {
     const merged = (t.merged || []).length
@@ -241,15 +365,15 @@ function renderTopics(p){
       + (i.change ? ' <span class="' + (isDown(i.change) ? "down" : "up") + '">'
                     + esc(i.change) + '</span>' : "")
       + '</span>').join("");
-    return '<article class="topic">'
+    return '<article class="topic" id="topic-' + esc(t.topic_id) + '">'
       + '<div class="thead"><span class="chan">' + esc(t.primary_channel) + '</span>'
       + '<h2>' + esc(t.title) + '</h2></div>'
       + merged
       + '<div class="body">'
-      + '<div><div class="lbl">정리</div><p>' + esc(t.organized) + '</p></div>'
+      + '<div><div class="lbl">정리</div>' + paragraphs(t.organized) + '</div>'
       + '<div><div class="lbl">요약</div><p class="summary">' + esc(t.summary) + '</p></div>'
       + (chips ? '<div><div class="lbl">지표</div><div class="metrics">' + chips + '</div></div>' : "")
-      + '<div class="draft"><div class="lbl">인사이트 초안 — 검토 필요</div>'
+      + '<div class="draft"><div class="lbl">인사이트</div>'
       + '<p>' + esc(t.draft_insight) + '</p></div>'
       + '</div></article>';
   }).join("");
@@ -271,6 +395,8 @@ function renderRoster(p){
 
 renderMasthead(PAYLOAD);
 renderStrip(PAYLOAD);
+renderSectors(PAYLOAD);
+renderToc(PAYLOAD);
 renderTopics(PAYLOAD);
 renderRoster(PAYLOAD);
 </script>

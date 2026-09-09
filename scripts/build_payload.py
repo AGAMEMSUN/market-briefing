@@ -22,8 +22,9 @@ _OUT_PATH = _STATE_DIR / "payload.json"
 
 LABELS = {
     "KOSPI": "코스피", "KOSDAQ": "코스닥", "KR 10Y": "국고채 10Y",
-    "S&P 500": "S&P 500", "NASDAQ": "나스닥", "USD/KRW": "원/달러",
+    "S&P 500": "S&P 500", "NASDAQ": "나스닥",
     "US 10Y": "미 국채 10Y", "VIX": "VIX",
+    "USD/KRW": "원/달러", "DXY": "달러인덱스", "WTI": "WTI유", "Gold": "금",
 }
 
 # 하루에 지수가 50% 넘게 움직이는 일은 없다 — 그 정도면 시장이 아니라 데이터가 틀린 것이다.
@@ -68,6 +69,17 @@ def strip_indicators(snapshot: dict) -> list[dict]:
     return out
 
 
+def strip_sectors(snapshot: dict) -> list[dict]:
+    """섹터는 스냅샷에서 이미 등락률 내림차순으로 정렬돼 있고 라벨도 붙어 있다.
+
+    렌더가 쓰는 네 필드만 옮긴다 — `last` 는 히트맵에 안 나가므로 싣지 않는다.
+    """
+    return [{"ticker": s.get("ticker"), "label": s.get("label"),
+             "change_pct": s.get("change_pct"), "as_of": s.get("as_of")}
+            for s in (snapshot.get("sectors") or [])
+            if isinstance(s.get("change_pct"), (int, float))]
+
+
 def topic_payload(section: dict) -> dict:
     """섹션 JSON 에서 렌더가 쓰는 필드만 옮긴다.
 
@@ -93,20 +105,8 @@ def topic_payload(section: dict) -> dict:
     }
 
 
-def brand() -> str:
-    """대시보드 머리말에 붙일 사용자별 표기(예: 소속 스터디 이름).
-
-    `.env` 에서 읽는다 — 사람마다 다른 값이고 `.env` 는 커밋되지 않으므로,
-    저장소를 클론한 다른 사용자에게 남의 소속이 따라가지 않는다. 비워두면
-    브랜드 없이 '마켓 브리핑'으로만 나온다.
-    """
-    import toss_client  # .env 파서를 재사용한다
-
-    return toss_client.load_env().get("BRIEFING_BRAND", "").strip()
-
-
 def build(topics: list[dict], sections: list[dict], snapshot: dict, index: dict,
-          collected_at: str = "", brand_name: str = "") -> dict:
+          collected_at: str = "") -> dict:
     noise = index.get("noise_counts") or {}
     parts = [f"{label} {noise[key]}건" for key, label in
              (("advertorial", "협찬성 기사"), ("low_signal", "저신호 단문"),
@@ -115,11 +115,11 @@ def build(topics: list[dict], sections: list[dict], snapshot: dict, index: dict,
     return {
         "date": index.get("date") or datetime.now().strftime("%Y-%m-%d"),
         "collected_at": collected_at,
-        "brand": brand_name,
         "channel_count": len(index.get("channels") or {}),
         "message_count": total,
         "filtered_out": noise,
         "indicators": strip_indicators(snapshot),
+        "sectors": strip_sectors(snapshot),
         "topics": [topic_payload(s) for s in sections],
         "quiet_channels": index.get("quiet_channels") or [],
         "not_checked_channels": index.get("not_checked_channels") or [],
@@ -145,13 +145,13 @@ def main() -> None:
         topics, sections,
         json.loads(_SNAPSHOT_PATH.read_text(encoding="utf-8")),
         json.loads(_INDEX_PATH.read_text(encoding="utf-8")),
-        collected_at=datetime.now().strftime("%H:%M KST 발행"),
-        brand_name=brand())
+        collected_at=datetime.now().strftime("%H:%M KST 발행"))
     _OUT_PATH.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
 
     dropped = [i["label"] for i in payload["indicators"] if i["spark"] is None]
     print(f"완료: {_OUT_PATH} (토픽 {len(payload['topics'])}개, "
-          f"지표 {len(payload['indicators'])}개, {_OUT_PATH.stat().st_size/1024:.0f}KB)")
+          f"지표 {len(payload['indicators'])}개, 섹터 {len(payload['sectors'])}개, "
+          f"{_OUT_PATH.stat().st_size/1024:.0f}KB)")
     if dropped:
         print(f"  스파크라인 제외(시계열 이상): {', '.join(dropped)}")
 

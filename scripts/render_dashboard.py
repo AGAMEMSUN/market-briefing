@@ -21,11 +21,14 @@ _OUT_PATH = _STATE_DIR / "dashboard.html"
 
 _PLACEHOLDER = "__PAYLOAD__"
 _TITLE_PLACEHOLDER = "__TITLE__"
-_DEFAULT_TITLE = "마켓 브리핑"
 
 # 탭 제목은 payload 가 아니라 HTML 에 박혀야 한다 — Artifact 는 파일 앞부분의
 # <title> 태그를 읽어 아티팩트 이름을 정하므로 JS 로 바꾸면 반영되지 않는다.
-_TITLE_ESCAPES = {"&": "&amp;", "<": "&lt;", ">": "&gt;"}
+#
+# 예전에는 `.env` 의 BRIEFING_BRAND 를 앞에 붙였다. 이 브리핑의 목적이 특정 모임의
+# 제출물에서 "텔레그램에 쌓인 정보를 정리해 시황·거시를 파악하는 것"으로 바뀌면서
+# 소속 표기가 의미를 잃어 제목을 고정 상수로 되돌렸다.
+TITLE = "마켓 브리핑"
 
 # `<` 로 시작하는 태그 종료·주석 시퀀스를 막고, JS 문자열 리터럴에서 줄 종결자로
 # 해석될 수 있는 두 문자를 이스케이프한다.
@@ -46,20 +49,11 @@ def escape_for_script(payload_json: str) -> str:
     return payload_json
 
 
-def title_for(brand: str) -> str:
-    """탭·아티팩트 제목. brand 가 없으면 중립 제목을 쓴다."""
-    brand = (brand or "").strip()
-    text = f"{brand} {_DEFAULT_TITLE}" if brand else _DEFAULT_TITLE
-    for raw, escaped in _TITLE_ESCAPES.items():
-        text = text.replace(raw, escaped)
-    return text
-
-
-def render(template: str, payload_json: str, brand: str = "") -> str:
+def render(template: str, payload_json: str) -> str:
     if _PLACEHOLDER not in template:
         raise ValueError(f"템플릿에 {_PLACEHOLDER} 자리표시자가 없습니다.")
     rendered = template.replace(_PLACEHOLDER, escape_for_script(payload_json))
-    return rendered.replace(_TITLE_PLACEHOLDER, title_for(brand))
+    return rendered.replace(_TITLE_PLACEHOLDER, TITLE)
 
 
 def main() -> None:
@@ -67,16 +61,14 @@ def main() -> None:
         raise SystemExit(f"payload 가 없습니다: {_PAYLOAD_PATH}")
 
     payload_json = _PAYLOAD_PATH.read_text(encoding="utf-8")
-    payload = json.loads(payload_json)  # 깨진 JSON 을 템플릿에 넣지 않는다
+    json.loads(payload_json)  # 깨진 JSON 을 템플릿에 넣지 않는다
 
     _OUT_PATH.parent.mkdir(parents=True, exist_ok=True)
     _OUT_PATH.write_text(
-        render(_TEMPLATE_PATH.read_text(encoding="utf-8"), payload_json,
-               payload.get("brand", "")),
+        render(_TEMPLATE_PATH.read_text(encoding="utf-8"), payload_json),
         encoding="utf-8",
     )
-    print(f"완료: {_OUT_PATH} ({_OUT_PATH.stat().st_size / 1024:.0f}KB, "
-          f"제목 '{title_for(payload.get('brand', ''))}')")
+    print(f"완료: {_OUT_PATH} ({_OUT_PATH.stat().st_size / 1024:.0f}KB, 제목 '{TITLE}')")
 
 
 if __name__ == "__main__":

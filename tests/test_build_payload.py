@@ -95,3 +95,20 @@ def test_build_summarises_noise_counts_into_a_note():
 def test_build_note_is_empty_when_nothing_was_filtered():
     index = {"channels": {}, "noise_counts": {}}
     assert build_payload.build([], [], {"indicators": []}, index)["excluded_note"] == ""
+
+
+def test_sectors_pass_through_with_render_fields_only():
+    snapshot = {"sectors": [{"ticker": "XLE", "label": "에너지", "last": 104.0,
+                             "change_pct": 4.0, "as_of": "2026-09-08"}]}
+    assert build_payload.strip_sectors(snapshot) == [
+        {"ticker": "XLE", "label": "에너지", "change_pct": 4.0, "as_of": "2026-09-08"}]
+
+
+def test_sectors_without_a_change_are_dropped():
+    """등락률이 없으면 히트맵에 칠할 색이 없다 — 빈 칸을 만들지 않는다."""
+    assert build_payload.strip_sectors(
+        {"sectors": [{"ticker": "XLK", "label": "기술", "change_pct": None}]}) == []
+
+
+def test_sectors_are_empty_when_the_snapshot_has_none():
+    assert build_payload.strip_sectors({}) == []

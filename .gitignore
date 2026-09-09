@@ -16,6 +16,11 @@ daily/
 # 갱신 시 권한 오류가 난다.
 DASHBOARD_URL.txt
 
+# OS 잡파일 — 이 저장소는 OneDrive 동기화 폴더 안에 있어 desktop.ini 가 생긴다
+desktop.ini
+Thumbs.db
+.DS_Store
+
 # Claude Code 로컬 설정 (에이전트 정의만 추적)
 .claude/*
 !.claude/agents/

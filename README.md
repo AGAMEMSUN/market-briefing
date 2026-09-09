@@ -8,8 +8,8 @@
 원래 KECOBUGS 26th 위클리 "마켓브리핑" 작성용으로 만들었지만, 텔레그램으로 시황을
 받아보는 사람이면 그대로 쓸 수 있다. 본인 API 키만 넣으면 된다.
 
-> **인사이트는 초안이다.** 이 도구는 사실관계 정리와 논점 제시까지 한다.
-> 최종 견해·투자의견은 사람이 쓴다.
+> **인사이트는 무엇을 읽어내야 하는지에 대한 정리다.** 이 도구는 사실관계 정리와
+> 논점 제시까지 한다. 최종 판단·투자의견은 사람이 쓴다.
 
 | 명령 | 동작 |
 |---|---|
@@ -48,7 +48,6 @@ cp .env.example .env   # Windows: copy .env.example .env
 |---|---|---|
 | `TELEGRAM_API_ID` / `TELEGRAM_API_HASH` | **필수** | https://my.telegram.org → API development tools |
 | `TOSS_CLIENT_ID` / `TOSS_CLIENT_SECRET` | 선택 | 토스증권 앱 → 설정 → Open API |
-| `BRIEFING_BRAND` | 선택 | 대시보드 제목·머리말에 붙일 본인/소속 표기. 비우면 그냥 "마켓 브리핑" |
 
 `.env` 는 `.gitignore` 에 등록돼 있어 커밋되지 않는다. 사용자별 설정이 전부 여기
 모여 있어서, 이 저장소를 클론해도 남의 계정·소속·대시보드 주소가 따라오지 않는다.
@@ -105,7 +104,7 @@ python scripts/toss_client.py   # 연결 점검. 실패하면 원인과 조치�
 
 ```
 telegram_digest.py   구독 채널 전수 수집        → daily/YYYY-MM-DD.md
-market_snapshot.py   지표 8종 (토스 + 야후)     → .state/market_snapshot.json
+market_snapshot.py   지표 11종 + 섹터 11종      → .state/market_snapshot.json
                                                   .state/snapshot_brief.json
 build_index.py       노이즈 필터 + 중복 탐지    → .state/cluster_view.txt
    ↓ 오케스트레이터가 cluster_view 만 읽고 토픽 4~7개로 묶는다
@@ -138,6 +137,8 @@ JSON payload 만 만든다.
 | `scripts/telegram_login_setup.py` | 최초 1회 대화형 로그인 |
 | `scripts/telegram_digest.py` | 구독 채널 전수 수집 |
 | `scripts/channels.py` | 수집 제외 목록 + 협찬성 필터 대상 채널 |
+| `scripts/channel_selection.py` | 브로드캐스트 채널만 고르는 필터 |
+| `scripts/digest_manifest.py` | 수집 결과 매니페스트 기록 |
 | `scripts/market_snapshot.py` | 지표 조회 (토스 + 야후) |
 | `scripts/toss_client.py` | 토스증권 Open API 클라이언트 |
 | `scripts/noise_filter.py` | 저신호·협찬성·채널내 근사중복 주석 |
@@ -148,8 +149,11 @@ JSON payload 만 만든다.
 | `scripts/render_dashboard.py` | payload 주입 + `<script>` 이스케이프 |
 | `templates/dashboard.html` | 대시보드 고정 템플릿 |
 | `templates/briefing_template.md` | 블로그 원고 + 노션 제출 텍스트 템플릿 |
+| `tests/` | 파이썬 모듈 단위 테스트 (`python -m pytest tests/`) |
+| `docs/superpowers/` | 설계 문서(specs)와 구현 계획(plans) |
 | `archive/` | 완성한 브리핑 원고 보관 |
 | `daily/` | 수집 원문 — **git 에 올라가지 않음** |
+| `scripts/.state/` | 파이프라인 중간 산출물·세션·토큰 — **git 에 올라가지 않음** |
 
 ---
 
